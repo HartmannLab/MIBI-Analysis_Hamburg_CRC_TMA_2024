@@ -28,8 +28,8 @@ Visualization (`notebooks/viz`)
 
 Cell type annotation (`notebooks/lineage`)  
 
-* Major lineage marker annotation
-* Agreement with PyFlowSOM
+* Major lineage marker annotation (`Annotation_gating_Hamburg`)
+* Curation and agreement with PyFlowSOM (`Pyflowsome_clustering_Hamburg`)
 * Scyan clustering (`annotation_scyan`)
 * Consensus lineage annotations (`annotation_consensus`)
 * Analysis and visualization of cell type abundance (`CellTypeViz`)
