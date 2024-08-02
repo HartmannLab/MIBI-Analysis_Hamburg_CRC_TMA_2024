@@ -15,6 +15,7 @@ Data will be made available at a later point.
 Metadata preparation (`notebooks/metadata`)  
 
 Preprocessing (`notebooks/preprocessing`):
+
 * Image extraction and channel compensation with Toffy
 * Gradient correction
 * CLAHE correction of segmentationg channels, image segmentation with CellPose and feature extraction
@@ -25,8 +26,13 @@ Quality control (`notebooks/qc`)
 
 Visualization (`notebooks/viz`)  
 
-Cell type annotation (ongoing)  
+Cell type annotation (`notebooks/lineage`)  
 
+* Major lineage marker annotation
+* Agreement with PyFlowSOM
+* Scyan clustering (`annotation_scyan`)
+* Consensus lineage annotations (`annotation_consensus`)
+* Analysis and visualization of cell type abundance (`CellTypeViz`)
 
 ## Code overview
 
@@ -34,7 +40,4 @@ Jupyter notebooks can be found in the `notebooks` folder.
 
 ## Environment
 
-Most scripts can be run using the [koalive/mibiprofiling](https://hub.docker.com/r/koalive/mibiprofiling/tags) Docker image.
-
-
-
+Please note that the analyses steps have been run in different environments and reproducing the entire workflow would require to adapt paths and requirements. Most scripts can be run using the [koalive/mibiprofiling](https://hub.docker.com/r/koalive/mibiprofiling/tags) Docker image.
