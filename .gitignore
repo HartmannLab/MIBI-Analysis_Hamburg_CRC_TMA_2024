@@ -4,3 +4,7 @@ data
 kasumi_melanoma*
 ksm*
 old_kasumi_runs*
+*.csv
+*.sqm
+*.rds
+*.png
