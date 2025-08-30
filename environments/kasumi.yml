@@ -1,0 +1,5 @@
+name: Kasumi
+channels:
+  - conda-forge
+  - r
+prefix: /home/loan/miniforge3/envs/Kasumi

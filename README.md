@@ -41,6 +41,7 @@ Due to the diverse computational requirements of different analysis steps, this 
 **Used for:** R-based statistical analysis and visualization
 - **Notebooks:**
   - `notebooks/metadata/CohortPlotR.ipynb` - Clinical cohort visualization and statistics
+  - `notebooks/multicellular/BiplotFactors.ipynb` - Visualize factors associated with clinical variables
   - `notebooks/spatial/KasumiColorectal.ipynb` - Spatial metabolic analysis with Kasumi
   - `notebooks/spatial/MistyLines.ipynb` – Spatial lineage analysis with MISTy
 
