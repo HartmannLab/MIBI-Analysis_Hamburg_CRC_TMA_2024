@@ -29,3 +29,16 @@ notebooks/lineage/annotation_starling.ipynb
 notebooks/metabolism/*MetabViz_*.ipynb
 notebooks/multicellular/*.h5
 notebooks/spatial/*.pdf
+
+# Python package cache and build files  
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+build/
+dist/
+*.egg-info/
+.Python
+.pytest_cache/
+.coverage
+.mypy_cache/
