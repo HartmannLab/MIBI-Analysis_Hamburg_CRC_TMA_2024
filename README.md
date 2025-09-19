@@ -23,10 +23,51 @@ This project employs spatial proteomics to characterize the tumor microenvironme
 │   └── spatial/                 # Spatial analyses
 │   └── validation/              # Transcriptomics reanalyses
 │   └── viz/                     # Visualization notebooks
+├── mibi_analysis/               # Python package for MIBI analysis
+│   ├── __init__.py             # Package initialization
+│   ├── preprocessing.py        # Data normalization and preparation
+│   ├── mofa.py                 # MuVI/MOFA wrapper functions
+│   ├── visualization.py       # Plotting and visualization
+│   ├── interpretation.py      # Statistical analysis and interpretation
+│   └── README.md               # Package documentation
+├── examples/                    # Usage examples
+│   └── mibi_analysis_example.ipynb # Complete workflow example
 ├── data/                        # Data files (not included in repo)
 ├── environments/                # Environment specification files
+├── setup.py                     # Package installation script
 └── README.md                    # This file
 ```
+
+## MIBI Analysis Package
+
+This repository now includes a Python package (`mibi_analysis/`) that provides helper functions for preprocessing, running MuVI factor analysis, and visualizing results from MIBI data. The package extracts and modularizes the key functionality from the `notebooks/multicellular/MOFACell.ipynb` notebook.
+
+### Package Features
+
+- **Preprocessing**: Normalize muon objects with `normalize_mudata_features()` and `prepare_mudata_for_mofa()`
+- **MuVI Integration**: Run factor analysis with `run_mofa_analysis()` and extract results with `extract_factor_scores()`  
+- **Visualization**: Generate plots with `plot_factor_scores()`, `plot_factor_loadings()`, and confidence ellipses
+- **Interpretation**: Test clinical associations with `test_factor_associations()` and identify top loadings
+
+### Quick Start
+
+```python
+import mibi_analysis as ma
+import mudata as mu
+
+# Load and preprocess data
+mdata = mu.read_h5mu("data/celltype_features.h5mu")
+ma.prepare_mudata_for_mofa(mdata, normalize=True)
+
+# Run MOFA analysis  
+model_path = ma.run_mofa_analysis(mdata, n_factors=10)
+
+# Extract and visualize results
+factor_scores = ma.extract_factor_scores(model_path, mdata=mdata)
+plot = ma.plot_factor_scores(factor_scores, 'Factor 1', 'Factor 2', color_by='Stage')
+```
+
+See `examples/mibi_analysis_example.ipynb` for a complete usage example.
 
 ## Computational Environment Requirements
 
@@ -69,6 +110,24 @@ Detailed environment specification files and installation instructions can be fo
 - Package lists and version specifications
 - Installation commands
 - Environment activation instructions
+
+### Installing the MIBI Analysis Package
+
+To use the helper functions provided in this repository:
+
+```bash
+# Clone the repository
+git clone https://github.com/HartmannLab/MIBI-Analysis_Hamburg_CRC_TMA_2024.git
+cd MIBI-Analysis_Hamburg_CRC_TMA_2024
+
+# Install the package in development mode
+pip install -e .
+
+# Or install dependencies manually for the scverse environment
+conda env create -f environments/scverse.yml
+conda activate liana
+pip install -e .
+```
 
 ## Data Requirements
 
