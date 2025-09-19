@@ -1,8 +1,8 @@
 """
 MOFA/MuVI wrapper functions for factor analysis of MIBI data.
 
-This module provides convenient wrapper functions for running MOFA factor analysis
-on MuData objects and extracting results.
+This module provides convenient wrapper functions for running MOFA and MuVI factor analysis
+on MuData objects and extracting results, following the patterns from MOFACell.ipynb.
 """
 
 import numpy as np
@@ -10,9 +10,37 @@ import pandas as pd
 import mudata as mu
 import muon
 import mofax as mofa
+import muvi
+import liana as li
 from typing import Optional, Dict, Any, Union
 import warnings
 import os
+
+
+def get_device() -> str:
+    """
+    Get the appropriate device for MuVI computations.
+    
+    This function attempts to get a free GPU device using muvi.get_free_gpu_idx(),
+    following the same pattern as in MOFACell.ipynb. Falls back to CPU if no GPU available.
+    
+    Returns
+    -------
+    str
+        Device string ('cpu' or 'cuda:X' where X is the GPU index)
+        
+    Examples
+    --------
+    >>> import mibi_analysis as ma
+    >>> device = ma.get_device()
+    >>> print(f"Using device: {device}")
+    """
+    device = "cpu"
+    try:
+        device = f"cuda:{muvi.get_free_gpu_idx()}"
+    except Exception as e:
+        warnings.warn(f"Could not get GPU device, using CPU: {e}")
+    return device
 
 
 def run_mofa_analysis(
@@ -213,84 +241,138 @@ def calculate_reconstruction_r2(
 
 
 def extract_factor_scores(
-    model_path: str, 
-    mdata: Optional[mu.MuData] = None,
-    include_metadata: bool = True,
+    mdata: mu.MuData, 
+    obsm_key: str = 'X_mofa',
+    obs_keys: Optional[list] = None,
+    use_liana: bool = True,
+    model_path: Optional[str] = None,
     close_model: bool = True
 ) -> pd.DataFrame:
     """
-    Extract factor scores from a MOFA model and optionally merge with metadata.
+    Extract factor scores from a MuData object or MOFA model.
+    
+    This function extracts factor scores following the patterns from MOFACell.ipynb,
+    using liana utilities when available or falling back to direct model access.
     
     Parameters
     ----------
-    model_path : str
-        Path to the saved MOFA model file
-    mdata : mu.MuData, optional
-        Original MuData object to extract metadata from
-    include_metadata : bool, default True
-        Whether to include metadata from mdata.obs if mdata is provided
+    mdata : mu.MuData
+        MuData object containing factor scores in obsm
+    obsm_key : str, default 'X_mofa'
+        Key in mdata.obsm containing factor scores
+    obs_keys : list, optional
+        List of observation metadata keys to include (e.g., ['Stage', 'Sex'])
+    use_liana : bool, default True
+        Whether to use liana utilities for extraction (as in MOFACell.ipynb)
+    model_path : str, optional
+        Path to MOFA model file (used if use_liana=False)
     close_model : bool, default True
-        Whether to close the model after extraction
+        Whether to close the model after extraction (if using model_path)
         
     Returns
     -------
     pd.DataFrame
-        DataFrame with factor scores and optionally metadata
+        DataFrame with factor scores and metadata
         
     Examples
     --------
     >>> import mibi_analysis as ma
-    >>> # Extract factor scores only
-    >>> scores = ma.extract_factor_scores('mofa_model.h5ad')
+    >>> # Extract using liana (preferred method from MOFACell.ipynb)
+    >>> scores = ma.extract_factor_scores(mdata, obs_keys=['Stage', 'Sex'])
     >>> 
-    >>> # Extract with metadata
-    >>> scores_with_meta = ma.extract_factor_scores('mofa_model.h5ad', mdata=mdata)
+    >>> # Extract from model file
+    >>> scores = ma.extract_factor_scores(mdata, use_liana=False, model_path='mofa_model.h5ad')
     """
-    model = mofa.mofa_model(model_path)
+    if use_liana and obsm_key in mdata.obsm:
+        # Use liana utilities as in MOFACell.ipynb
+        if obs_keys is None:
+            obs_keys = ['Stage']  # Default from notebook
+            
+        try:
+            factor_scores = li.ut.get_factor_scores(
+                mdata, 
+                obsm_key=obsm_key, 
+                obs_keys=obs_keys
+            )
+            return factor_scores
+        except Exception as e:
+            warnings.warn(f"Could not extract factor scores using liana: {e}")
+            # Fall back to manual extraction
     
-    try:
-        # Get factor scores
-        Z = np.array(model.expectations["Z"]["group1"])
-        
-        # Create DataFrame with factor scores
-        n_factors = Z.shape[0]
+    # Manual extraction or fallback
+    if obsm_key in mdata.obsm:
+        # Extract from obsm
+        factor_matrix = mdata.obsm[obsm_key]
+        n_factors = factor_matrix.shape[1]
         factor_names = [f'Factor {i+1}' for i in range(n_factors)]
         
-        scores_df = pd.DataFrame(Z.T, columns=factor_names)
+        scores_df = pd.DataFrame(factor_matrix, columns=factor_names, index=mdata.obs.index)
         
-        # If MuData object is provided and metadata should be included
-        if mdata is not None and include_metadata:
-            # Ensure indices match
+        # Add metadata if requested
+        if obs_keys:
+            available_keys = [key for key in obs_keys if key in mdata.obs.columns]
+            if available_keys:
+                for key in available_keys:
+                    scores_df[key] = mdata.obs[key].values
+        
+        return scores_df
+    
+    elif model_path:
+        # Extract from model file (original implementation)
+        model = mofa.mofa_model(model_path)
+        
+        try:
+            # Get factor scores
+            Z = np.array(model.expectations["Z"]["group1"])
+            
+            # Create DataFrame with factor scores
+            n_factors = Z.shape[0]
+            factor_names = [f'Factor {i+1}' for i in range(n_factors)]
+            
+            scores_df = pd.DataFrame(Z.T, columns=factor_names)
+            
+            # Add metadata if MuData object provided
             if len(scores_df) == len(mdata.obs):
                 scores_df.index = mdata.obs.index
-                # Add metadata columns
-                for col in mdata.obs.columns:
-                    scores_df[col] = mdata.obs[col].values
-            else:
-                warnings.warn(
-                    f"Mismatch in number of samples between model ({len(scores_df)}) "
-                    f"and MuData ({len(mdata.obs)}). Metadata not included."
-                )
+                if obs_keys:
+                    available_keys = [key for key in obs_keys if key in mdata.obs.columns]
+                    for key in available_keys:
+                        scores_df[key] = mdata.obs[key].values
         
-    finally:
-        if close_model:
-            model.close()
-            
-    return scores_df
+        finally:
+            if close_model:
+                model.close()
+                
+        return scores_df
+    
+    else:
+        raise ValueError(f"No factor scores found in obsm['{obsm_key}'] and no model_path provided")
 
 
 def extract_factor_loadings(
-    model_path: str,
+    mdata: mu.MuData,
+    varm_key: str = 'LFs',
+    use_liana: bool = True,
+    model_path: Optional[str] = None,
     view_names: Optional[list] = None,
     close_model: bool = True
-) -> Dict[str, pd.DataFrame]:
+) -> Union[pd.DataFrame, Dict[str, pd.DataFrame]]:
     """
-    Extract factor loadings from a MOFA model.
+    Extract factor loadings from a MuData object or MOFA model.
+    
+    This function extracts factor loadings following the patterns from MOFACell.ipynb,
+    using liana utilities when available or falling back to direct model access.
     
     Parameters
     ----------
-    model_path : str
-        Path to the saved MOFA model file
+    mdata : mu.MuData
+        MuData object containing factor loadings in varm
+    varm_key : str, default 'LFs'
+        Key in varm containing factor loadings ('LFs' for MOFA, 'MuVI' for MuVI)
+    use_liana : bool, default True
+        Whether to use liana utilities for extraction (as in MOFACell.ipynb)
+    model_path : str, optional
+        Path to MOFA model file (used if use_liana=False)
     view_names : list, optional
         List of view names to extract loadings for. If None, extracts all views
     close_model : bool, default True
@@ -298,39 +380,66 @@ def extract_factor_loadings(
         
     Returns
     -------
-    Dict[str, pd.DataFrame]
-        Dictionary mapping view names to DataFrames of factor loadings
+    pd.DataFrame or Dict[str, pd.DataFrame]
+        If use_liana=True, returns a single DataFrame with loadings and view information.
+        Otherwise, returns a dictionary mapping view names to DataFrames of factor loadings.
         
     Examples
     --------
     >>> import mibi_analysis as ma
-    >>> loadings = ma.extract_factor_loadings('mofa_model.h5ad')
-    >>> macrophage_loadings = loadings['Macrophage']
+    >>> # Extract using liana (preferred method from MOFACell.ipynb)
+    >>> loadings = ma.extract_factor_loadings(mdata, varm_key='LFs')
+    >>> 
+    >>> # Extract from model file 
+    >>> loadings = ma.extract_factor_loadings(mdata, use_liana=False, model_path='mofa_model.h5ad')
     """
-    model = mofa.mofa_model(model_path)
+    if use_liana:
+        # Use liana utilities as in MOFACell.ipynb
+        try:
+            variable_loadings = li.ut.get_variable_loadings(mdata, varm_key=varm_key)
+            
+            # Add cell type (view) to the variable loadings as in the notebook
+            variable_loadings['view'] = ''
+            for view in mdata.mod.keys():
+                if view in mdata.varm and varm_key in mdata.varm:
+                    view_mask = mdata.varm[view] if hasattr(mdata.varm[view], '__len__') else np.arange(len(mdata.mod[view].var))
+                    variable_loadings.loc[view_mask, "view"] = view
+            
+            return variable_loadings
+        except Exception as e:
+            warnings.warn(f"Could not extract variable loadings using liana: {e}")
+            # Fall back to manual extraction
     
-    try:
-        loadings_dict = {}
+    # Manual extraction or fallback
+    if model_path:
+        # Extract from model file (original implementation)
+        model = mofa.mofa_model(model_path)
         
-        views_to_extract = view_names if view_names is not None else model.views
-        
-        for view_name in views_to_extract:
-            if view_name not in model.views:
-                warnings.warn(f"View '{view_name}' not found in model. Skipping.")
-                continue
+        try:
+            loadings_dict = {}
+            
+            views_to_extract = view_names if view_names is not None else model.views
+            
+            for view_name in views_to_extract:
+                if view_name not in model.views:
+                    warnings.warn(f"View '{view_name}' not found in model. Skipping.")
+                    continue
+                    
+                # Get loadings matrix for this view
+                W = model.expectations["W"][view_name]
                 
-            # Get loadings matrix for this view
-            W = model.expectations["W"][view_name]
-            
-            # Create DataFrame
-            n_factors = W.shape[1]
-            factor_names = [f'Factor {i+1}' for i in range(n_factors)]
-            
-            loadings_df = pd.DataFrame(W, columns=factor_names)
-            loadings_dict[view_name] = loadings_df
-            
-    finally:
-        if close_model:
-            model.close()
-            
-    return loadings_dict
+                # Create DataFrame
+                n_factors = W.shape[1]
+                factor_names = [f'Factor {i+1}' for i in range(n_factors)]
+                
+                loadings_df = pd.DataFrame(W, columns=factor_names)
+                loadings_dict[view_name] = loadings_df
+                
+        finally:
+            if close_model:
+                model.close()
+                
+        return loadings_dict
+    
+    else:
+        raise ValueError(f"Cannot extract loadings: use_liana=False but no model_path provided")

@@ -18,6 +18,7 @@ from .preprocessing import (
 )
 
 from .mofa import (
+    get_device,
     run_mofa_analysis,
     calculate_model_r2,
     calculate_reconstruction_r2,
@@ -50,6 +51,7 @@ __all__ = [
     "prepare_mudata_for_mofa",
     "get_modality_stats",
     # MOFA analysis
+    "get_device",
     "run_mofa_analysis", 
     "calculate_model_r2",
     "calculate_reconstruction_r2",

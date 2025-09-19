@@ -43,6 +43,8 @@ setup(
         "mudata>=0.2.0",
         "muon>=0.1.0",
         "mofax>=0.3.0",
+        "muvi>=0.2.0",
+        "liana>=1.0.0",
         "scikit-learn>=1.0.0",
     ],
     extras_require={

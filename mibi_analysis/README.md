@@ -1,12 +1,14 @@
 # MIBI Analysis Package
 
-A Python package for preprocessing, analyzing, and visualizing MIBI (Multiplexed Ion Beam Imaging) data using MuVI factor analysis and other multicellular analysis approaches.
+A Python package for preprocessing, analyzing, and visualizing MIBI (Multiplexed Ion Beam Imaging) data using MuVI factor analysis and other multicellular analysis approaches, following the patterns from `notebooks/multicellular/MOFACell.ipynb`.
 
 ## Features
 
 - **Preprocessing**: Normalize and prepare muon objects for factor analysis
-- **MuVI/MOFA Integration**: Convenient wrappers for running factor analysis
-- **Visualization**: Generate plots for factor scores, loadings, and confidence ellipses
+- **MuVI/MOFA Integration**: Convenient wrappers for running factor analysis using muon and muvi
+- **Liana Integration**: Uses liana utilities for factor score and loading extraction (as in MOFACell.ipynb)
+- **Device Detection**: Automatic GPU/CPU device detection using muvi
+- **Visualization**: Generate plots using plotnine for factor scores, loadings, and confidence ellipses
 - **Statistical Analysis**: Test associations between factors and clinical variables
 - **Interpretation**: Extract insights from factor analysis results
 
@@ -25,7 +27,7 @@ pip install -e .
 
 ### Dependencies
 
-The package requires Python 3.8+ and the following dependencies:
+The package requires Python 3.8+ and the following dependencies (following MOFACell.ipynb requirements):
 
 - numpy >= 1.20.0
 - pandas >= 1.3.0
@@ -36,41 +38,69 @@ The package requires Python 3.8+ and the following dependencies:
 - mudata >= 0.2.0
 - muon >= 0.1.0
 - mofax >= 0.3.0
+- **muvi >= 0.2.0** (for GPU detection and MuVI-specific functionality)
+- **liana >= 1.0.0** (for factor score and loading extraction utilities)
 - scikit-learn >= 1.0.0
 
 ## Quick Start
 
 ```python
 import mibi_analysis as ma
-import mudata as mu
+import muon as mu
+import liana as li
+from plotnine import *
+
+# Check device availability
+device = ma.get_device()
+print(f"Using device: {device}")
 
 # Load your MuData object
-mdata = mu.read_h5mu("path/to/your/data.h5mu")
+features = mu.read_h5mu("path/to/your/data.h5mu")
 
-# Preprocess data
-ma.prepare_mudata_for_mofa(mdata, normalize=True, filter_features=True)
+# Preprocess data (center and scale as in MOFACell.ipynb)
+ma.prepare_mudata_for_mofa(features, normalize=True, filter_features=True)
 
-# Run MOFA analysis
-model_path = ma.run_mofa_analysis(mdata, n_factors=10, outfile='mofa_model.h5ad')
+# Run MOFA analysis with same parameters as MOFACell.ipynb
+model_path = ma.run_mofa_analysis(
+    features, 
+    n_factors=10,
+    use_obs='union',
+    convergence_mode='medium',
+    scale_groups=False,
+    scale_views=False,
+    seed=1337
+)
 
 # Calculate model performance
 r2_results = ma.calculate_model_r2(model_path)
 print(f"Overall R²: {r2_results['mean_r2']:.3f}")
 
-# Extract factor scores with metadata
-factor_scores = ma.extract_factor_scores(model_path, mdata=mdata, include_metadata=True)
+# Extract factor scores using liana utilities (as in MOFACell.ipynb)
+factor_scores = ma.extract_factor_scores(
+    features, 
+    obsm_key='X_mofa', 
+    obs_keys=['Stage'],
+    use_liana=True
+)
 
-# Test factor-clinical associations
+# Extract variable loadings using liana utilities  
+variable_loadings = ma.extract_factor_loadings(
+    features,
+    varm_key='LFs',
+    use_liana=True
+)
+
+# Test factor-clinical associations using Kruskal-Wallis
 associations = ma.test_factor_associations(
     factor_scores, 
     clinical_variables=['Stage', 'Sex'],
-    test_type='auto'
+    test_type='kruskal'
 )
 
-# Visualize factor scores
+# Visualize factor scores with confidence ellipses (as in MOFACell.ipynb)
 plot = ma.plot_factor_scores(
     factor_scores, 
-    'Factor 1', 'Factor 2', 
+    'Factor1', 'Factor2',  # Note: liana uses 'Factor1' not 'Factor 1'
     color_by='Stage', 
     add_ellipses=True
 )
@@ -88,12 +118,13 @@ Functions for normalizing and preparing MuData objects:
 
 ### `mibi_analysis.mofa`
 
-Wrapper functions for MOFA/MuVI analysis:
+Wrapper functions for MOFA/MuVI analysis following MOFACell.ipynb patterns:
 
-- `run_mofa_analysis()`: Run factor analysis with sensible defaults
+- `get_device()`: Detect GPU/CPU device using muvi (as in MOFACell.ipynb)
+- `run_mofa_analysis()`: Run factor analysis with same parameters as MOFACell.ipynb
 - `calculate_model_r2()`: Compute variance explained by the model
-- `extract_factor_scores()`: Get factor scores with metadata
-- `extract_factor_loadings()`: Get factor loadings for interpretation
+- `extract_factor_scores()`: Get factor scores using liana utilities (preferred) or model file
+- `extract_factor_loadings()`: Get factor loadings using liana utilities (preferred) or model file
 
 ### `mibi_analysis.visualization`
 
