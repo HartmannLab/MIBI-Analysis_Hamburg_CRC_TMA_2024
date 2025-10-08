@@ -1,10 +1,10 @@
-# Robust multicellular programs dissect the complex tumor microenvironment in colorectal adenocarcinomas and track disease progression
+# Robust multicellular programs dissect the complex tumor microenvironment and track disease progression in colorectal adenocarcinomas
 
 [![DOI](https://zenodo.org/badge/750937733.svg)](https://doi.org/10.5281/zenodo.17008987)
 
-**Authors:** Loan Vulliard, Teresa Glauner, Sven Truxa, Miray Cetin, Yu-Le Wu, Laura Behm, Jovan Tanevski, Julio Saez-Rodriguez, Guido Sauter, Felix J. Hartmann
+**Authors:** Loan Vulliard, Teresa Glauner, Sven Truxa, Miray Cetin, Yu-Le Wu, Ronald Simon, Laura Behm, Jovan Tanevski, Julio Saez-Rodriguez, Guido Sauter, Felix J. Hartmann
 
-This repository contains the computational analysis pipeline for our study on multicellular programs in colorectal adenocarcinomas using MIBI (Multiplexed Ion Beam Imaging) technology on tissue microarrays (TMAs) from CRC biopsies collected at the Institute of Pathology, University Medical Center Hamburg-Eppendorf.
+This repository contains the computational analysis pipeline for our study on multicellular programs in colorectal adenocarcinomas using MIBI (Multiplexed Ion Beam Imaging) technology on tissue microarrays (TMAs) from CRC biopsies collected at the Institute of Pathology, University Medical Center Hamburg-Eppendorf. You can find the full preprint here: https://arxiv.org/abs/2510.05083
 
 ## Overview
 
@@ -113,6 +113,10 @@ Cell type annotation (`notebooks/lineage`)
 * Consensus lineage annotations (`annotation_consensus`)
 * Analysis and visualization of cell type abundance (`CellTypeViz`)
 
+## MuVIcell
+
+The multicellular analysis we performed can be adapted to your use cases using the dedicated [MuVIcell package](https://github.com/HartmannLab/MuVIcell).
+
 ## Reproducibility
 
 To ensure reproducibility:
@@ -127,6 +131,6 @@ For questions about the analysis pipeline or code, please open an issue in this 
 
 ## Citation
 
-If you use this code or analysis pipeline, please cite our manuscript: [Citation to be added upon publication].
+If you use this code or analysis pipeline, please cite our manuscript: https://arxiv.org/abs/2510.05083
 
 
