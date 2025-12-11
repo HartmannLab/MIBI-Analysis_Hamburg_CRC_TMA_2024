@@ -19,9 +19,9 @@ This project employs spatial proteomics to characterize the tumor microenvironme
 │   ├── metabolism/              # Metabolic marker analysis
 │   ├── metadata/                # Clinical metadata processing
 │   ├── multicellular/           # Multicellular program analysis
-│   └── qc/                      # Data quality checks
-│   └── spatial/                 # Spatial analyses
-│   └── validation/              # Transcriptomics reanalyses
+│   ├── qc/                      # Data quality checks
+│   ├── spatial/                 # Spatial analyses
+│   ├── validation/              # Transcriptomics reanalyses
 │   └── viz/                     # Visualization notebooks
 ├── data/                        # Data files (not included in repo)
 ├── environments/                # Environment specification files
