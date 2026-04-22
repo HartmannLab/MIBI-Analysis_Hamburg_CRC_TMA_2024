@@ -1,6 +1,6 @@
-# Robust multicellular programs dissect the complex tumor microenvironment and track disease progression in colorectal adenocarcinomas
+# Robust multicellular programs dissect the complex tumor microenvironment and track disease progression in colorectal cancer
 
-[![DOI](https://zenodo.org/badge/750937733.svg)](https://doi.org/10.5281/zenodo.17008987)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17008987.svg)](https://zenodo.org/badge/latestdoi/17008987)
 
 **Authors:** Loan Vulliard, Teresa Glauner, Sven Truxa, Miray Cetin, Yu-Le Wu, Ronald Simon, Laura Behm, Jovan Tanevski, Julio Saez-Rodriguez, Guido Sauter, Felix J. Hartmann
 
@@ -86,32 +86,9 @@ This analysis requires:
 2. **Data preparation**: Place your data files in the appropriate `data/` subdirectories
 3. **Preprocessing**: Start with notebooks in `notebooks/preprocessing/` using the Docker environment
 4. **Cell annotation**: Proceed to `notebooks/lineage/` for cell type identification
-5. **Multicellular analysis**: Use notebooks in `notebooks/multicellular/` for higher-order analysis
-6. **Visualization**: Generate figures using notebooks in `notebooks/viz/` and `notebooks/metadata/`
-
-## Key Analysis Steps
-
-Metadata preparation (`notebooks/metadata`)  
-
-Preprocessing (`notebooks/preprocessing`):
-
-* Image extraction and channel compensation with Toffy
-* Gradient correction
-* CLAHE correction of segmentationg channels, image segmentation with CellPose and feature extraction
-* Cell and mask filtering
-* Data transformation
-
-Quality control (`notebooks/qc`)  
-
-Visualization (`notebooks/viz`)  
-
-Cell type annotation (`notebooks/lineage`)  
-
-* Major lineage marker annotation (`Annotation_gating_Hamburg`)
-* Curation and agreement with PyFlowSOM (`Pyflowsome_clustering_Hamburg`)
-* Scyan clustering (`annotation_scyan`)
-* Consensus lineage annotations (`annotation_consensus`)
-* Analysis and visualization of cell type abundance (`CellTypeViz`)
+5. **Metadata prepration**: Harmonize patient annotations for stratified analyses with notebooks in `notebooks/metadata/`
+6. **Multicellular analysis**: Use notebooks in `notebooks/multicellular/` for higher-order analysis
+7. **Visualization**: Generate additional figures using notebooks in `notebooks/viz/`
 
 ## MuVIcell
 
