@@ -23,84 +23,48 @@ This project employs spatial proteomics to characterize the tumor microenvironme
 │   ├── spatial/                 # Spatial analyses
 │   ├── validation/              # Transcriptomics reanalyses
 │   └── viz/                     # Visualization notebooks
-├── data/                        # Data files (not included in repo)
-├── environments/                # Environment specification files
+├── data/                        # Data files (not included in repo, see DATA.md)
+├── environments/                # Environment specification files, see environments/README.md
+├── DATA.md                      # Description of the shared data files
 └── README.md                    # This file
 ```
 
-## Computational Environment Requirements
+## Data
 
-Due to the diverse computational requirements of different analysis steps, this project uses **four distinct environments**:
+The cell-level measurements, cell type annotations and clinical metadata are deposited on Zenodo: [10.5281/zenodo.18504904](https://doi.org/10.5281/zenodo.18504904). The supplementary tables are deposited separately: [10.5281/zenodo.17280877](https://doi.org/10.5281/zenodo.17280877). Multiplexed images and segmentation masks will be provided on the BioImage Archive.
 
-### 1. Docker Environment: `koalive/mibiprofiling`
-**Used for:** Preprocessing steps and notebooks requiring Julia packages
-- **Notebooks:**
-  - `notebooks/preprocessing/FilterAndViz_Hamburg.ipynb` - Data filtering using BioProfiling.jl
-  - `notebooks/preprocessing/FilterSegmentationMask.ipynb` - Segmentation mask filtering
-  - `notebooks/viz/ExampleImages.ipynb` - Pipeline visualization examples
+[DATA.md](DATA.md) describes the columns of each file, how the files connect, and how to load them.
 
-### 2. Kasumi R Environment
-**Used for:** R-based statistical analysis and visualization
-- **Notebooks:**
-  - `notebooks/metadata/CohortPlotR.ipynb` - Clinical cohort visualization and statistics
-  - `notebooks/multicellular/BiplotFactors.ipynb` - Visualize factors associated with clinical variables
-  - `notebooks/spatial/KasumiColorectal.ipynb` - Spatial metabolic analysis with Kasumi
-  - `notebooks/spatial/MistyLines.ipynb` – Spatial lineage analysis with MISTy
+## Computational Environments
 
-### 3. scverse Environment
-**Used for:** Factor analysis and enrichment analyses
-- **Notebooks:**
-  - `notebooks/multicellular/PrepareMuData.ipynb` - Multi-modal data preparation
-  - `notebooks/multicellular/MOFACell.ipynb` - Factor analysis
+The analysis steps use six environments:
 
-### 4. xgboost Environment
-**Used for:** Machine learning predictions and PyTorch-based analyses
-- **Notebooks:**
-  - `notebooks/lineage/annotation_scyan.ipynb` - Cell type annotation using Scyan
-  - `notebooks/lineage/annotation_consensus.ipynb` - Consensus cell type annotation
-  - `notebooks/lineage/Annotation_gating_Hamburg.ipynb` - Manual gating-based annotation
-  - All notebooks involving XGBoost predictions and deep learning models
+| Environment | Used for | Specification |
+|---|---|---|
+| Docker image `koalive/mibiprofiling` | Preprocessing and notebooks requiring Julia packages | [DockerHub](https://hub.docker.com/r/koalive/mibiprofiling) |
+| Kasumi | R-based statistics and visualization, MISTy and Kasumi | `environments/kasumi.yml`, `environments/kasumi.csv` |
+| scverse | Factor analysis and enrichment analyses | `environments/scverse.yml` |
+| xgboost | Cell type annotation, machine learning predictions and PyTorch-based analyses | `environments/xgboost.yml` |
+| scverse-squidpy | Factor refits with other spatial encodings, including squidpy | `environments/scverse_squidpy.yml` |
+| scimap_cozi | COZI enrichment between cell types | `environments/scimap_cozi.yml` |
 
-*Note: to ensure accurate reproduction of the manuscript results, these are not minimal environments but the original ones used when designing and running the analyses.*
-
-## Environment Setup
-
-Detailed environment specification files and installation instructions can be found in the `environments/` directory. Each environment includes:
-- Package lists and version specifications
-- Installation commands
-- Environment activation instructions
-
-## Data Requirements
-
-This analysis requires:
-- Raw MIBI imaging data
-- Segmentation masks (cellpose-generated)
-- Clinical metadata
-- Transformed cell tables
-
-*Note: Due to patient data privacy and size constraints, raw data files are not included in this repository. They will be uploaded on data sharing platforms as soon as possible.*
+[environments/README.md](environments/README.md) lists the notebooks that use each environment and explains how to create it. These are not minimal environments, but the original ones used to design and run the analyses, to reproduce the manuscript results accurately.
 
 ## Getting Started
 
-1. **Set up environments**: Follow instructions in `environments/` to install required computational environments
-2. **Data preparation**: Place your data files in the appropriate `data/` subdirectories
-3. **Preprocessing**: Start with notebooks in `notebooks/preprocessing/` using the Docker environment
-4. **Cell annotation**: Proceed to `notebooks/lineage/` for cell type identification
-5. **Metadata prepration**: Harmonize patient annotations for stratified analyses with notebooks in `notebooks/metadata/`
-6. **Multicellular analysis**: Use notebooks in `notebooks/multicellular/` for higher-order analysis
-7. **Visualization**: Generate additional figures using notebooks in `notebooks/viz/`
+1. **Set up environments**: follow [environments/README.md](environments/README.md).
+2. **Data**: download the files from Zenodo into `data/`, as described in [DATA.md](DATA.md).
+3. **Preprocessing**: start with notebooks in `notebooks/preprocessing/` using the Docker environment.
+4. **Cell annotation**: proceed to `notebooks/lineage/` for cell type identification.
+5. **Metadata preparation**: harmonize patient annotations for stratified analyses with notebooks in `notebooks/metadata/`.
+6. **Multicellular analysis**: use notebooks in `notebooks/multicellular/` for higher-order analysis.
+7. **Visualization**: generate additional figures using notebooks in `notebooks/viz/`.
+
+The deposited files are the outputs of steps 3 and 4 and the input of step 5, so analyses can also start from them directly.
 
 ## MuVIcell
 
 The multicellular analysis we performed can be adapted to your use cases using the dedicated [MuVIcell package](https://github.com/HartmannLab/MuVIcell).
-
-## Reproducibility
-
-To ensure reproducibility:
-- Use the specified computational environments
-- Follow the notebook execution order outlined above
-- Check environment specifications in `environments/` directory
-- Verify data preprocessing steps before downstream analysis
 
 ## Contact
 
