@@ -106,9 +106,8 @@ def load_feature_sets():
             return (view, name) in compact_spatial
         return False
 
-    cozi = pd.read_csv(data_dir + "cozi_all_fovs.csv", index_col=0)
+    cozi = pd.read_csv(data_dir + "cozi_celltypes.csv", index_col="fov")[["interaction", "zscore"]]
     cozi.columns = ["interaction", "value"]
-    cozi = cozi.replace([np.inf, -np.inf], np.nan)
     cozi[["target", "neighbour"]] = [target_and_predictor("." + i) for i in cozi.interaction]
     cozi = cozi[cozi.target.isin(coarse_of) & cozi.neighbour.isin(coarse_of)]
     cozi["view"] = cozi.target.map(coarse_of)
