@@ -29,3 +29,4 @@ notebooks/lineage/annotation_starling.ipynb
 notebooks/metabolism/*MetabViz_*.ipynb
 notebooks/multicellular/*.h5
 notebooks/spatial/*.pdf
+__pycache__/

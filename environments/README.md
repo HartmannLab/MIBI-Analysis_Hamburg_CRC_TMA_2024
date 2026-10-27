@@ -31,7 +31,7 @@ Create conda environment from `xgboost.yml`. Optimized for NVIDIA GPU and CUDA 1
 - All notebooks with XGBoost predictions or deep learning models, such as `notebooks/spatial/StageXGB.ipynb` and `notebooks/spatial/EncodingClinicalInformation.ipynb`
 
 ### 5. scverse-squidpy Environment
-**Used for:** Refitting the MuVI factors with other spatial encodings, including squidpy neighbourhood enrichment (`multicellular/SpatialFeatureContribution.ipynb`, `spatial/stage_fold_factors.py`).  
+**Used for:** Refitting the MuVI factors with other spatial encodings, including squidpy neighbourhood enrichment (`multicellular/SpatialFeatureContribution.ipynb`, `.utils/stage_fold_factors.py`).  
 The scverse environment with squidpy added. `scverse_squidpy.yml` lists the exact versions, but conda cannot create it in one step: squidpy 1.8.2 declares zarr 3, which breaks anndata 0.11.2, so zarr stays below 3. Clone the scverse environment instead and add the two packages:
 ```bash
 conda create --name liana-squidpy --clone liana

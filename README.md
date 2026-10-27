@@ -14,6 +14,7 @@ This project employs spatial proteomics to characterize the tumor microenvironme
 
 ```
 ├── notebooks/                   # Jupyter notebooks for analysis
+│   ├── .utils/                  # Helpers and scripts shared by notebooks
 │   ├── preprocessing/           # Data preprocessing and filtering
 │   ├── lineage/                 # Cell type annotation workflows
 │   ├── metabolism/              # Metabolic marker analysis

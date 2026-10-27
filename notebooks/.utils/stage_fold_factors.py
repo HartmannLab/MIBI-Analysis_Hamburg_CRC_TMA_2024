@@ -1,6 +1,6 @@
 """MuVI factors fit within the stage prediction splits of StageXGB.ipynb.
 
-Run with the liana-squidpy environment, which holds muvi and the squidpy scores. EncodingClinicalInformation.ipynb
+Run with the liana-squidpy environment, which holds muvi and the squidpy scores. spatial/EncodingClinicalInformation.ipynb
 calls this script, because its own environment, pam-keras3, has no muvi.
 
     python stage_fold_factors.py export
